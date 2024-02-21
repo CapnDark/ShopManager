@@ -15,11 +15,13 @@ public class GameManager : MonoBehaviour
     public List<Image> timers = new List<Image>();
     public List<GameObject> itemTrays = new List<GameObject>();
 
+    public GameObject customerPrefab;
+
+    public static List<GameObject> customersInScene = new List<GameObject>();
+    public List<GameObject> customerSlotsInScene = new List<GameObject>();
 
     private void Awake()
     {
-        // If there is an instance, and it's not me, delete myself.
-
         if (gm != null && gm != this)
         {
             Destroy(this);
@@ -39,6 +41,18 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if(Random.Range(0,10) > 5)
+        {
+            if(customersInScene.Count < customerSlotsInScene.Count)
+            {
+                GameObject newCustomer = Instantiate(customerPrefab);
+                customersInScene.Add(newCustomer);
+            }
+        }
+
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            Instantiate(customerPrefab);
+        }
     }
 }

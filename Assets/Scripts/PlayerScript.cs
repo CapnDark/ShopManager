@@ -97,6 +97,26 @@ public class PlayerScript : MonoBehaviour
             item.positionInStack = tempPOS++;
         }
 
+        switch (itemId)
+        {
+            case 0:
+                croissantCount--;
+                break;
+
+            case 1:
+                cupcakeCount--;
+                break;
+
+            case 2:
+                doughnutCount--;
+                break;
+        }
+
+        if(croissantCount+cupcakeCount+doughnutCount <= 0)
+        {
+            anim.SetBool("isCarrying", false);
+            isCarrying = false;
+        }
     }
 
     void TakeItem(int itemID)
@@ -157,10 +177,22 @@ public class PlayerScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        isMakingItem = true;
-        if(other.CompareTag("CustomerSlot"))
+        if(other.CompareTag("Croissant") || other.CompareTag("Cupcake") || other.CompareTag("Doughnut"))
         {
-            SellItem(1);
+            isMakingItem = true;
+        }
+
+        if (other.CompareTag("CustomerSlot"))
+        {            
+            foreach(ItemScript item in trayStack)
+            {
+                if(item.itemId == other.GetComponent<CustomerRequestScript>().requestedItemId)
+                {
+                    SellItem(other.GetComponent<CustomerRequestScript>().requestedItemId);
+                    other.GetComponent<CustomerRequestScript>().hasRecievedItem = true;
+                    return;
+                }
+            }
         }
     }
 
@@ -184,12 +216,15 @@ public class PlayerScript : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        isMakingItem = false;
-        ResetTime();
-
-        if(timerImage != null)
+        if (other.CompareTag("Croissant") || other.CompareTag("Cupcake") || other.CompareTag("Doughnut"))
         {
-            timerImage.gameObject.SetActive(false);
+            isMakingItem = false;
+            ResetTime();
+            if (timerImage != null)
+            {
+                timerImage.gameObject.SetActive(false);
+            }
+
         }
     }
 }

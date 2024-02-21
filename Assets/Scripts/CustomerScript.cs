@@ -18,12 +18,15 @@ public class CustomerScript : MonoBehaviour
 
     private NavMeshAgent agent;
     private Animator anim;
+    private Canvas canvas;
 
     // Start is called before the first frame update
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
+        canvas = GetComponentInChildren<Canvas>();
+        canvas.worldCamera = Camera.main;
 
         randomItemNo = Random.Range(0, 3);
         spritePlaceHolder = thoughtCloud.transform.GetChild(0).GetComponent<Image>();
@@ -43,6 +46,12 @@ public class CustomerScript : MonoBehaviour
         {
             hasReachedPoint = true;
             RequestRandomItem();
+
+            if (targetPos == GameManager.gm.customerInstantiatePoint)
+            {
+                GameManager.customersInScene.Remove(this.gameObject);
+                Destroy(this.gameObject);
+            }
         }
         else
         {
@@ -60,6 +69,7 @@ public class CustomerScript : MonoBehaviour
     {
         spritePlaceHolder.sprite = itemPic[randomItemNo];
         thoughtCloud.SetActive(true);
+        GameManager.openOrder = true;
     }
 
     void MoveCustomer()
@@ -67,11 +77,40 @@ public class CustomerScript : MonoBehaviour
         if(!hasReachedPoint)
         {
             anim.SetBool("isWalking", true);
-            agent.SetDestination(GameManager.gm.customerSlot.position);
+            agent.SetDestination(targetPos.position);
         }
         else
         {
             anim.SetBool("isWalking", false);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.CompareTag("CustomerSlot"))
+        {
+            other.GetComponent<CustomerRequestScript>().requestedItemId = randomItemNo;
+            other.GetComponent<CustomerRequestScript>().hasRecievedItem = false;
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if(other.CompareTag("CustomerSlot") && other.GetComponent<CustomerRequestScript>().hasRecievedItem)
+        {
+            thoughtCloud.SetActive(false);
+
+            hasRecievedItem = true;
+            hasReachedPoint = false;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("CustomerSlot"))
+        {
+            other.GetComponent<CustomerRequestScript>().requestedItemId = -1;
+            other.GetComponent<CustomerRequestScript>().hasRecievedItem = false;
         }
     }
 }
