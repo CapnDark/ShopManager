@@ -16,9 +16,11 @@ public class GameManager : MonoBehaviour
     public List<GameObject> itemTrays = new List<GameObject>();
 
     public GameObject customerPrefab;
+    public GameObject tutorialBox;
 
     public static List<GameObject> customersInScene = new List<GameObject>();
     public List<GameObject> customerSlotsInScene = new List<GameObject>();
+    bool canStartGame = false;
 
     private void Awake()
     {
@@ -35,13 +37,28 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        if (PlayerPrefs.HasKey("Tutorial"))
+        {
+            if(PlayerPrefs.GetInt("Tutorial") == 0)
+            {
+                tutorialBox.SetActive(true);
+            }
+            else
+            {
+                canStartGame = true;
+            }
+        }
+        else
+        {
+            tutorialBox.SetActive(true);
+        }
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(Random.Range(0,10) > 5)
+        if(canStartGame && Random.Range(0,10) > 5)
         {
             if(customersInScene.Count < customerSlotsInScene.Count)
             {
@@ -50,9 +67,16 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            Instantiate(customerPrefab);
-        }
+        //if(Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    Instantiate(customerPrefab);
+        //}
+    }
+
+    public void StartGame()
+    {
+        PlayerPrefs.SetInt("Tutorial", 1);
+        tutorialBox.SetActive(false);
+        canStartGame = true;
     }
 }
